@@ -1,7 +1,6 @@
-const inquirer = require('inquirer');
+const prompts = require('./questions.js').prompts();
 const jest = require('jest');
 const fs = require('fs');
-const questions = require('./questions.json');
 
 
 class Element {
@@ -47,118 +46,34 @@ class Text extends Element {
 
 //First question affects what questions are asked in future prompts
 
-function initialPrompt() {
-    inquirer.prompt([
-        {
-        name: 'shape',
-        type: 'list',
-        message: 'Please choose a shape for the icon.',
-        choices: ['Circle', 'Square', 'Triangle']}
-    ]).then((shape) => {
-        console.log(shape);
-        collectData(shape);
-    });
-};
-
-
-
-function shapePrompts(shape) {
+async function collectData() {
     let shapeData;
-    switch(shape) {
+    const polygon = await prompts.init();
+    switch (polygon.shape) {
         case 'Circle':
-            shapeData = inquirer.prompt([
-                {
-                    name: 'base',
-                    type: 'input',
-                    message: questions.circleRadius
-                }
-            ]);
+            shapeData = await prompts.circle();
             break;
         case 'Square':
-            shapeData = inquirer.prompt([
-                {
-                    name: 'base',
-                    type: 'input',
-                    message: questions.squareSide
-                },
-                {
-                    name: 'corners',
-                    type: 'input',
-                    message: questions.squareCorners
-                }
-            ]);
+            shapeData = await prompts.square();
             break;
         case 'Triangle':
-            shapeData = inquirer.prompt([
-                {
-                    name: 'direction',
-                    type: 'list',
-                    message: questions.triangleDirection,
-                    choices: ['left', 'up', 'down', 'right']
-                },
-                {
-                    name: 'base',
-                    type: 'input',
-                    message: questions.triangleBase
-                },
-                {
-                    name: 'length',
-                    type: 'input',
-                    message: questions.triangleLength
-                }
-            ]);
+            shapeData = await prompts.triangle();
             break;
-        default:
-            break;
+    };
+
+    const generalData = await prompts.general();
+
+    const data = {
+        ...polygon,
+        ...shapeData,
+        ...generalData
     }
-    shapeData.polygon = shape;
-    return shapeData;
+    compileData(data);
 };
 
-function generalPrompts() {
-    const generalData = inquirer.prompt([
-        {
-            name: 'shapeColor',
-            type: 'input',
-            message: questions.shapeColor
-        },
-        {
-            name: 'textContent',
-            type: 'input',
-            message: questions.textContent
-        },
-        {
-            name: 'textSize',
-            type: 'input',
-            message: questions.textSize
-        },
-        {
-            name: 'textFamily',
-            type: 'list',
-            message: questions.textFamily,
-            choices: ['serif', 'sans-serif', 'monospace']
-        },
-        {
-            name: 'textColor',
-            type: 'input',
-            message: questions.textColor
-        },
-        {
-            name: 'shapeCenter',
-            type: 'input',
-            message: questions.shapeCenter
-        },
-        {
-            name: 'textCenter',
-            type: 'input',
-            message: questions.textCenter
-        }
-    ])
-    return generalData;
+function compileData(data) {
+    
+    
 }
 
-async function collectData(shape) {
-    //take values of shapeData
-    //take values of generalData
-    //combine into a single object
-}
+collectData();
