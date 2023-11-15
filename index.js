@@ -1,48 +1,7 @@
-const prompts = require('./questions.js').prompts();
-const jest = require('jest');
+const prompts = require('./lib/questions.js').prompts();
+const { Circle, Square, Triangle, Text } = require('./lib/shapes.js')
 const fs = require('fs');
 
-
-class Element {
-    constructor(elementX, elementY, color) {
-        this.elementX = elementX;
-        this.elementY = elementY;
-        this.color = color;
-    }
-}
-
-class Circle extends Element {
-    constructor(elementX, elementY, radius, color) {
-        super(elementX, elementY, color);
-        this.radius = radius;
-    }
-}
-
-class Square extends Element {
-    constructor(elementX, elementY, sideLength, cornerRoundness, color) {
-        super(elementX, elementY, color);
-        this.sideLength = sideLength;
-        this.cornerRoundness = cornerRoundness;
-    }
-}
-
-class Triangle extends Element {
-    constructor(elementX, elementY, base, length, direction, color) {
-        super(elementX, elementY, color);
-        this.base = base;
-        this.length = length;
-        this.direction = direction;
-    }
-}
-
-class Text extends Element {
-    constructor(elementX, elementY, textContent, fontSize, fontFamily, color) {
-        super(elementX, elementY, color)
-        this.textContent = textContent;
-        this.fontSize = fontSize;
-        this.fontFamily = fontFamily;
-    }
-}
 
 //First question affects what questions are asked in future prompts
 
@@ -72,6 +31,20 @@ async function collectData() {
 };
 
 function compileData(data) {
+    let svgText = '';
+    const shape = data.shape === 'Circle' ? new Circle(data.base, data.shapeColor) : data.shape === 'Square' ? new Square(data.base, data.corners, data.shapeColor) : new Triangle(data.base, data.length, data.direction, data.shapeColor);
+    if (data.textContent.length > 0) {
+        const text = new Text(data.textContent, data.textSize, data.textFamily, data.textColor)
+        svgText += text.render();
+    }
+
+    const svgContent = `<svg version="1.1" width="300" height="200"> ${shape.render()} ${svgText}</svg>`
+
+    fs.writeFile(`./logo.svg`, svgContent, (err) => {
+        if (err) throw err;
+        console.log('Logo generated!')
+    })
+
     
     
 }
